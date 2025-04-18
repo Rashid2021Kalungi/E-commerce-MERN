@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import loginIcons from "../assest/signin.gif";
 import imageTobase64 from "../helpers/ImageTobas64";
+import summeryApi from "../common";
+import { toast } from "react-toastify";
 
 export const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,6 +15,7 @@ export const SignUp = () => {
     confirmPassword: "",
     profilePicture: "",
   });
+  const navigate=useNavigate()
 
   const handleOnchange = (e) => {
     const { name, value } = e.target;
@@ -24,21 +27,42 @@ export const SignUp = () => {
       };
     });
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  };
-  const handleUploadPic = async(e) => {
-    const file = e.target.files[0];
-    const imagePic=await imageTobase64(file)
-    setData((preve)=>{
-      return{
-        ...preve,
-        profilePicture: imagePic
+    if (data.password === data.confirmPassword) {
+      const dataResponse = await fetch(summeryApi.signUp.url, {
+        method: summeryApi.signUp.method,
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
+      const dataApi = await dataResponse.json();
+      if (dataApi?.success) {
+        toast.success(dataApi.message || "Operation successful!");
+
+        navigate("/login")
+      } else if (dataApi?.error) {
+        toast.error(dataApi.message || "Something went wrong.");
       }
-    })
-  };
 
+      // console.log("data", dataApi);
+    } else {
+      toast.error("Password mismatch");
+      return;
+    }
+  };
+  const handleUploadPic = async (e) => {
+    const file = e.target.files[0];
+    const imagePic = await imageTobase64(file);
+    setData((preve) => {
+      return {
+        ...preve,
+        profilePicture: imagePic,
+      };
+    });
+  };
 
   return (
     <section id="signup">
@@ -53,7 +77,11 @@ export const SignUp = () => {
             <form action="">
               <label className="absolute bottom-0 w-full text-xs text-center font-bold bg-slate-200 bg-opacity-70 py-2 cursor-pointer z-10 group-hover:bg-opacity-90 transition">
                 Upload Photo
-                <input type="file" className="hidden" onChange={handleUploadPic}/>
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleUploadPic}
+                />
               </label>
             </form>
           </div>
@@ -69,7 +97,7 @@ export const SignUp = () => {
                 <input
                   type="text"
                   name="name"
-                  value={data.name}
+                  value={data.name || ""}
                   placeholder="Enter your name ...."
                   className="w-full h-full outline-none bg-transparent "
                   onChange={handleOnchange}
@@ -83,7 +111,7 @@ export const SignUp = () => {
                 <input
                   type="email"
                   name="email"
-                  value={data.email}
+                  value={data.email || ""}
                   placeholder="Enter email address ...."
                   className="w-full h-full outline-none bg-transparent "
                   onChange={handleOnchange}
@@ -99,7 +127,7 @@ export const SignUp = () => {
                   placeholder="Enter Password ...."
                   onChange={handleOnchange}
                   name="password"
-                  value={data.password}
+                  value={data.password || ""}
                   className="w-full h-full outline-none bg-transparent"
                   required
                 />
@@ -119,7 +147,7 @@ export const SignUp = () => {
                   placeholder="Confrim Password ...."
                   onChange={handleOnchange}
                   name="confirmPassword"
-                  value={data.confirmPassword}
+                  value={data.confirmPassword || ""}
                   className="w-full h-full outline-none bg-transparent"
                   required
                 />
