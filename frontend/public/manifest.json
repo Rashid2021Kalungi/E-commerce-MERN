@@ -1,0 +1,11 @@
+{
+  "name": "MERN",
+  "short_name": "MERN",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "A brief description of your app",
+  "theme_color": "#000000"
+}
+
+

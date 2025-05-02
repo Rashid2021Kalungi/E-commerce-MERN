@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import loginIcons from "../assest/signin.gif";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import summeryApi from "../common";
+import { toast } from "react-toastify";
+import Context from "../context";
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [data, setData] = useState({
     email: "",
     password: "",
   });
+  const {fetchUserDetails}=useContext(Context)
+  // console.log("general context", generalContext.fetchUserDetails());
+  const navigate=useNavigate()
 
   const handleOnchange = (e) => {
     const { name, value } = e.target;
@@ -19,9 +25,29 @@ export const Login = () => {
       };
     });
   };
-  const handleSubmit=(e)=>{
-    e.preventDefault()
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const dataRsponse = await fetch(summeryApi.signIn.url, {
+      method: summeryApi.signIn.method,
+      credentials: 'include',
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(data)
+    });
+
+    const dataApi = await dataRsponse.json();
+
+    if (dataApi.success) {
+      toast.success(dataApi.message);
+      // generalContext.
+      fetchUserDetails()
+      navigate("/")
+    }
+    if (dataApi.error) {
+      toast.error(dataApi.message)
+    }
+  };
 
   // console.log("data login",data)
   return (
